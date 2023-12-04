@@ -65,6 +65,6 @@ jobs:
         shell: julia --project=docs --color=yes {0}
         run: |
           using Documenter: DocMeta, doctest
-          using maxnet
-          DocMeta.setdocmeta!(maxnet, :DocTestSetup, :(using maxnet); recursive=true)
-          doctest(maxnet)
+          using Maxnet
+          DocMeta.setdocmeta!(Maxnet, :DocTestSetup, :(using Maxnet); recursive=true)
+          doctest(Maxnet)

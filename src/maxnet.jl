@@ -1,4 +1,4 @@
-module maxnet
+module Maxnet
 
 # Write your package code here.
 

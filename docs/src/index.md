@@ -1,14 +1,14 @@
 ```@meta
-CurrentModule = maxnet
+CurrentModule = Maxnet
 ```
 
-# maxnet
+# Maxnet
 
-Documentation for [maxnet](https://github.com/tiemvanderdeure/maxnet.jl).
+Documentation for [Maxnet](https://github.com/tiemvanderdeure/Maxnet.jl).
 
 ```@index
 ```
 
 ```@autodocs
-Modules = [maxnet]
+Modules = [Maxnet]
 ```

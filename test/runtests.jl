@@ -1,6 +1,6 @@
-using maxnet
+using Maxnet
 using Test
 
-@testset "maxnet.jl" begin
+@testset "Maxnet.jl" begin
     # Write your tests here.
 end
