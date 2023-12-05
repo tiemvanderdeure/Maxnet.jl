@@ -1,16 +1,16 @@
-using maxnet
+using Maxnet
 using Documenter
 
-DocMeta.setdocmeta!(maxnet, :DocTestSetup, :(using maxnet); recursive=true)
+DocMeta.setdocmeta!(Maxnet, :DocTestSetup, :(using Maxnet); recursive=true)
 
 makedocs(;
-    modules=[maxnet],
+    modules=[Maxnet],
     authors="Tiem van der Deure <tiemvanderdeure@gmail.com>, Michael Krabbe Borregaard <mkborregaard@sund.ku.dk>",
-    repo="https://github.com/tiemvanderdeure/maxnet.jl/blob/{commit}{path}#{line}",
-    sitename="maxnet.jl",
+    repo="https://github.com/tiemvanderdeure/Maxnet.jl/blob/{commit}{path}#{line}",
+    sitename="Maxnet.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://tiemvanderdeure.github.io/maxnet.jl",
+        canonical="https://tiemvanderdeure.github.io/Maxnet.jl",
         edit_link="master",
         assets=String[],
     ),
@@ -20,6 +20,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/tiemvanderdeure/maxnet.jl",
+    repo="github.com/tiemvanderdeure/Maxnet.jl",
     devbranch="master",
 )
