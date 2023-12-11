@@ -9,10 +9,10 @@ struct HingeFeature <: AbstractFeatureClass end
 
 char_to_feature = Dict(
     'l' => [LinearFeature(), CategoricalFeature()],
-    'q' => QuadraticFeature(),
-    'p' => ProductFeature(),
-    't' => ThresholdFeature(),
-    'h' => HingeFeature()
+    'q' => [QuadraticFeature()],
+    'p' => [ProductFeature()],
+    't' => [ThresholdFeature()],
+    'h' => [HingeFeature()]
 )
 
 # Parse a string of features to feature classes
