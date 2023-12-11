@@ -12,3 +12,4 @@ function thresholds(x, nknots = 50)
     Bool.(x .>= k')
 end
 
+quadratic(x) = x^2

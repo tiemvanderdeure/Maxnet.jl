@@ -1,6 +1,5 @@
 function addsamples(presences, predictors) # this should be a general sdm thing
     predictors = Tables.rowtable(predictors)
-    @assert length(presences) == length(predictors) 
 
     to_add = setdiff(predictors[presences], predictors[.~presences]);
 
@@ -15,10 +14,26 @@ function lambdas(reg, p, weights; λmax = 4, n = 200)
     10 .^ range(λmax, 0; length = n) .* c
 end
 
-function maxnet(presences, predictors; features = [LinearFeature(), ProductFeature()],
+function model_matrix(continuous_predictors, categorical_predictors, features)
+    ms = map(features) do fe
+        Maxnet.feature_cols(continuous_predictors, categorical_predictors, fe, 10)
+    end
+    
+    # combine all into one model matrix
+    mm = reduce(hcat, ms)
+
+    # Get the feature class for each column in the model matrix
+    column_feature_classes = mapreduce(vcat, ms, features) do m, fe
+        repeat([fe], size(m, 2))
+    end
+
+    return (mm, column_feature_classes)
+end
+
+function maxnet(presences, predictors; features = "lq",
                 regularization_multiplier = 1.0,
                 regularization_function = default_regularization,
-                addsamplestobackground = true, dofit = false)
+                addsamplestobackground = true, weight_factor::Float64 = 100.)
 
     #disallowmissing!(predictors)
     if addsamplestobackground
@@ -27,28 +42,22 @@ function maxnet(presences, predictors; features = [LinearFeature(), ProductFeatu
         predictors = Tables.columntable(predictors)
     end
 
-    predictor_keys = keys(predictors)
-    terms = term.(predictor_keys)
-    continuous_indices = findall(predictor_keys .!= :ecoreg) # MLJ scitype system
+    features = features_from_string(features) 
 
-    # Get all the terms
-    all_terms = mapreduce(+, features) do fe
-        feature_terms(terms, continuous_indices, fe)
-    end
+    categoricals_keys = Tuple(key for key in keys(predictors) if predictors[key] isa CategoricalArrays.CategoricalArray)
+    continuous_keys = Tuple(key for key in keys(predictors) if ~(predictors[key] isa CategoricalArrays.CategoricalArray))
+    
+    continuous_predictors = predictors[continuous_keys]
+    categorical_predictors = predictors[categoricals_keys]
 
-    # Generate the model matrix
-    sch = StatsModels.schema(predictors, Dict(:ecoreg => StatsModels.FullDummyCoding()))
-    ts = StatsModels.apply_schema(all_terms, sch)
-    mm = StatsModels.modelcols(StatsModels.collect_matrix_terms(ts), predictors)
-
-    # Model matrix metadata
-    column_feature_classes = coef_features(ts)
-
+    # Get a matrix for each feature
+    (mm, column_feature_classes) = model_matrix(continuous_predictors, categorical_predictors, features)
+    
     # Generate regularization
-    reg = regularization_function(mm, column_feature_classes, presences)
+    reg = regularization_function(mm, column_feature_classes, presences) .* regularization_multiplier
 
-    # Generate weights
-    weights = presences .* 1. .+ (1 .- presences) .* 100.
+    # Generate weights, 1 for presences, weightfactor for absences
+    weights = presences .* 1. .+ (1 .- presences) .* weight_factor
 
     # generate lambdas
     λ = lambdas(reg, presences, weights; λmax = 4, n = 200)
@@ -56,8 +65,8 @@ function maxnet(presences, predictors; features = [LinearFeature(), ProductFeatu
     machine = Lasso.fit(
         Lasso.LassoPath, mm, presences, Lasso.Distributions.Binomial(); 
         wts = weights, penalty_factor = reg, standardize = false, λ = λ,
-        dofit = dofit
+        dofit = true, irls_maxiter = 1_000
     )
 
-    return machine
+    return mm, machine
 end

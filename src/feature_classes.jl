@@ -7,37 +7,47 @@ struct ProductFeature <: AbstractFeatureClass end
 struct ThresholdFeature <: AbstractFeatureClass end
 struct HingeFeature <: AbstractFeatureClass end
 
-coef_features(t::StatsModels.ContinuousTerm) = LinearFeature()
-coef_features(t::StatsModels.InteractionTerm) = ProductFeature()
-coef_features(t::StatsModels.CategoricalTerm) = [CategoricalFeature() for _ in 1:length(t.contrasts.levels)]
-coef_features(t::ThresholdTerm) = fill(ThresholdFeature(), 1:StatsModels.width(t))
-coef_features(t::HingeTerm) = fill(HingeFeature(), StatsModels.width(t))
-coef_features(t::StatsModels.FunctionTerm{typeof(^), Vector{StatsModels.AbstractTerm}}) = QuadraticFeature()
+char_to_feature = Dict(
+    'l' => [LinearFeature(), CategoricalFeature()],
+    'q' => QuadraticFeature(),
+    'p' => ProductFeature(),
+    't' => ThresholdFeature(),
+    'h' => HingeFeature()
+)
+function features_from_string(s::AbstractString)
+    mapreduce(vcat, collect(s)) do c 
+        if !haskey(char_to_feature, c) 
+            throw(error("$c is not a feature class, use one of $(keys(char_to_feature))"))
+        end
+        char_to_feature[c]
+    end
+end
 
-coef_features(t::StatsModels.TupleTerm) = reduce(vcat, coef_features.(t))
+# The whole thing without statsmodels - translate namedtuple directly into matrices
+feature_cols(cont_vars, cat_vars, ::LinearFeature, nk) = reduce(hcat, cont_vars)
+feature_cols(cont_vars, cat_vars, ::CategoricalFeature, nk) = mapreduce(x -> permutedims(levels(x)) .== x, hcat, cat_vars)
+feature_cols(cont_vars, cat_vars, ::QuadraticFeature, nk) = mapreduce(x -> x.^2, hcat, cont_vars)
 
-# How should inputs be translated to terms for each feature class
-feature_terms(terms, continuous_vars, ::LinearFeature) = terms
-function feature_terms(terms, continuous_vars, ::ProductFeature)
-    continuous_terms = terms[continuous_vars]
+function feature_cols(continuous_vars, cat_vars, ::ProductFeature, nk)
     # loop over all combinations, generate an interaction term, and add these together
-    product_terms = mapreduce(+, 1:(length(continuous_terms)-1)) do i
-        mapreduce(+, i+1:length(continuous_terms)) do j
-            StatsModels.InteractionTerm((continuous_terms[i], continuous_terms[j]))
+    product_terms = mapreduce(hcat, 1:(length(continuous_vars)-1)) do i
+        mapreduce(hcat, i+1:length(continuous_vars)) do j
+            continuous_vars[i] .* continuous_vars[j]
         end
     end
     return product_terms
 end
 
-function feature_terms(terms, continuous_idx, ::QuadraticFeature)
-    fun_expr = :(x^2)
-    exponent_term = term(2)
-
-    return mapreduce(+, continuous_idx) do i
-        term_ = terms[i]
-        return StatsModels.FunctionTerm(^, [term_, exponent_term], fun_expr)
+function feature_cols(continuous_predictors, cat_pred, ::HingeFeature, nknots = 50)
+    mapreduce(hcat, continuous_predictors) do pred
+        Maxnet.hinge(pred)
     end
 end
 
-feature_terms(terms, continuous_idx, ::HingeFeature, nknots = 50) = HingeTerm.(terms[continuous_idx], term(nknots))
-feature_terms(terms, continuous_idx, ::ThresholdFeature, nknots = 50) = ThresholdTerm.(terms[continuous_idx], term(nknots))
+function feature_cols(continuous_predictors, cat_pred, ::ThresholdFeature, nknots = 50)
+    mat = mapreduce(hcat, continuous_predictors) do pred
+        Maxnet.hinge(pred, nknots)
+    end
+
+    return mat
+end
