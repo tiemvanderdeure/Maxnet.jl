@@ -4,8 +4,8 @@ struct MaxnetModel
     coefs
     alpha
     entropy
-    categoricals_keys
-    continuous_keys
+    keys_categorical
+    keys_continuous
 end
 
 """
@@ -31,6 +31,7 @@ end
 - `weight_factor`: A `Float64` to adjust the weight of the background samples. Defaults to 100.0.
 - `backend`: Either `LassoBackend()` or `GLMNetBackend()`, to use Lasso.jl or GLMNet.jl fit the model.
 Lasso.jl is written in pure julia, but can be slower with large model matrices (e.g. when hinge is enabled). Defaults to `LassoBackend`.
+- keys_categorical
 - `kw...`: Further arguments to be passed to Lasso.fit or GLMNet.glmnet
 
 # Returns
@@ -38,11 +39,12 @@ Lasso.jl is written in pure julia, but can be slower with large model matrices (
 
 """
 
-function maxnet(presences::BitVector, predictors, features::Vector{AbstractFeatureClass};
+function maxnet(presences::BitVector, predictors, features::Vector{<:AbstractFeatureClass};
                 regularization_multiplier::Float64 = 1.0,
                 regularization_function = default_regularization,
                 addsamplestobackground::Bool = true, weight_factor::Float64 = 100.,
                 backend::MaxnetBackend = LassoBackend(),
+                keys_categorical = Tables.schema(predictors).names[findall(Tables.schema(predictors).types .<: CategoricalArrays.CategoricalValue)],
                 kw...)
 
     # check if predictors is a table
@@ -55,10 +57,9 @@ function maxnet(presences::BitVector, predictors, features::Vector{AbstractFeatu
     end
 
     # divide predictors into continuous and categorical
-    categoricals_keys = Tuple(key for key in keys(predictors) if predictors[key] isa CategoricalArrays.CategoricalArray)
-    continuous_keys = Tuple(key for key in keys(predictors) if ~(predictors[key] isa CategoricalArrays.CategoricalArray))
-    continuous_predictors = predictors[continuous_keys]
-    categorical_predictors = predictors[categoricals_keys]
+    keys_continuous = Tuple(key for key in keys(predictors) if ~(key in keys_categorical))
+    continuous_predictors = predictors[keys_continuous]
+    categorical_predictors = predictors[keys_categorical]
 
     # remove categoricalfeature if there are no categorical features
     if length(categorical_predictors) == 0
@@ -114,8 +115,8 @@ function maxnet(presences::BitVector, predictors, features::Vector{AbstractFeatu
         coefs,
         alpha,
         entropy,
-        categoricals_keys,
-        continuous_keys
+        keys_categorical,
+        keys_continuous
     )
 end
 
