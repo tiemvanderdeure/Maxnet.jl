@@ -2,9 +2,10 @@ module Maxnet
 
 import Tables, Lasso, GLMNet, Interpolations, CategoricalArrays, GLM
 import StatsAPI, StatsBase, Statistics
-import MLJModelInterface
+import MLJModelInterface as MMI
 
 using GLM: IdentityLink, CloglogLink, LogLink, LogitLink
+using MLJModelInterface: Continuous, Binary, Multiclass, Count
 
 export IdentityLink, CloglogLink, LogLink, LogitLink # re-export relevant links
 export LassoBackend, GLMNetBackend
