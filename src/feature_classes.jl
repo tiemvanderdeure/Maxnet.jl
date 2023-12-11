@@ -14,6 +14,8 @@ char_to_feature = Dict(
     't' => ThresholdFeature(),
     'h' => HingeFeature()
 )
+
+# Parse a string of features to feature classes
 function features_from_string(s::AbstractString)
     mapreduce(vcat, collect(s)) do c 
         if !haskey(char_to_feature, c) 
@@ -23,9 +25,23 @@ function features_from_string(s::AbstractString)
     end
 end
 
+# Default features based on number of presences
+function default_features(np)
+    features = [LinearFeature(), CategoricalFeature()]
+    if np >= 10
+        append!(features, [QuadraticFeature()])
+    end
+    if np >= 15
+        append!(features, [HingeFeature()])
+    end
+    if np >= 80
+        append!(features, [ProductFeature()])
+    end
+end
+
 # The whole thing without statsmodels - translate namedtuple directly into matrices
 feature_cols(cont_vars, cat_vars, ::LinearFeature, nk) = reduce(hcat, cont_vars)
-feature_cols(cont_vars, cat_vars, ::CategoricalFeature, nk) = mapreduce(x -> permutedims(levels(x)) .== x, hcat, cat_vars)
+feature_cols(cont_vars, cat_vars, ::CategoricalFeature, nk) = mapreduce(x -> permutedims(CategoricalArrays.levels(x)) .== x, hcat, cat_vars)
 feature_cols(cont_vars, cat_vars, ::QuadraticFeature, nk) = mapreduce(x -> x.^2, hcat, cont_vars)
 
 function feature_cols(continuous_vars, cat_vars, ::ProductFeature, nk)
@@ -51,3 +67,4 @@ function feature_cols(continuous_predictors, cat_pred, ::ThresholdFeature, nknot
 
     return mat
 end
+
