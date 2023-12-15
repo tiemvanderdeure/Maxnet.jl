@@ -9,7 +9,7 @@ function predict(m::MaxnetModel, x; link = CloglogLink())
         feature_cols(continuous_predictors, categorical_predictors, fe, 10)
     end
 
-    exponent = mm * m.coefs .+ m.alpha
+    exponent = mm * m.coefs .+ m.alpha .+ m.entropy
 
     GLM.linkinv.(Ref(link), exponent)
 end
