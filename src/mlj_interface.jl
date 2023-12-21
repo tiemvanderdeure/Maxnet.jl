@@ -1,12 +1,3 @@
-#=MMI.@mlj_model mutable struct MaxnetBinaryClassifier <: MMI.Deterministic
-    features = ""
-    regularization_multiplier = 1.0
-    regularization_function = default_regularization
-    weight_factor = 100.
-    backend = LassoBackend
-    kw...
-end
-=#
 mutable struct MaxnetBinaryClassifier <: MMI.Probabilistic
     features::Union{String, Vector{<:AbstractFeatureClass}}
     regularization_multiplier::Float64
@@ -14,6 +5,7 @@ mutable struct MaxnetBinaryClassifier <: MMI.Probabilistic
     weight_factor::Float64
     backend::MaxnetBackend
     link::GLM.Link
+    clamp::Bool
     kw
 end
 
@@ -21,14 +13,38 @@ function MaxnetBinaryClassifier(;
     features="", 
     regularization_multiplier = 1.0, regularization_function = default_regularization, 
     weight_factor = 100., backend = LassoBackend(), 
-    link = CloglogLink(),
+    link = CloglogLink(), clamp = false,
     kw...
 )
+
     MaxnetBinaryClassifier(
         features, regularization_multiplier, regularization_function, 
-        weight_factor, backend, link, kw
+        weight_factor, backend, link, clamp, kw
     )
 end
+
+"""
+    MaxnetBinaryClassifier
+
+    A model type for fitting a maxnet model using `MLJ`.
+        
+    Use `MaxnetBinaryClassifier()` to create an instance with default parameters, or use keyword arguments to specify parameters.
+    
+    The `link` and `clamp` keywords are passed to `predict`. All other keywords are passed to `maxnet` when te model is fit.
+    See the documentation of [`maxnet`](@ref) for the parameters and their defaults.
+
+    # Examples
+    ```jldoctest
+    using Maxnet, MLJBase
+    p_a, env = Maxnet.bradypus()
+
+    mach = machine(MaxnetBinaryClassifier(features = "lqp"), env, categorical(p_a))
+    fit!(mach)
+    yhat = MLJBase.predict(mach, env)
+    ```
+
+"""
+MaxnetBinaryClassifier
 
 MMI.input_scitype(::Type{<:MaxnetBinaryClassifier}) =
         MMI.Table{<:Union{<:AbstractVector{<:Continuous}, <:AbstractVector{<:Multiclass}}} #{<:Union{<:Continuous <:Multiclass}}
@@ -65,6 +81,6 @@ function MMI.fit(m::MaxnetBinaryClassifier, verbosity::Int, X, y)
 end
 
 function MMI.predict(m::MaxnetBinaryClassifier, (fitresult, decode), Xnew)
-    p = predict(fitresult, Xnew; link = m.link)
+    p = predict(fitresult, Xnew; link = m.link, clamp = m.clamp)
     MMI.UnivariateFinite(decode, [1 .- p, p])
 end

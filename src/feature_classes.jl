@@ -26,6 +26,17 @@ function features_from_string(s::AbstractString)
 end
 
 # Default features based on number of presences
+
+"""
+    default_features(np)
+
+Takes the number of presences `np` and returns a `Vector` of `AbstractFeatureClass`s that are used my maxent as default.
+
+If `np` is less than ten, then only `LinearFeature` and `CategoricalFeature` are used.
+If it is at least 10, then `QuadraticFeature` is additionally used.
+If it is at least 15, then `HingeFeature` is additionally used.
+If it is at least 80, then `ProductFeature` is additionally used.
+"""
 function default_features(np)
     features = [LinearFeature(), CategoricalFeature()]
     if np >= 10

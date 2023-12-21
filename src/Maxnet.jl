@@ -11,6 +11,7 @@ export IdentityLink, CloglogLink, LogitLink, LogLink # re-export relevant links
 export LassoBackend, GLMNetBackend
 export maxnet, predict
 export LinearFeature, CategoricalFeature, QuadraticFeature, ProductFeature, ThresholdFeature, HingeFeature
+export MaxnetBinaryClassifier
 
 # Write your package code here.
 

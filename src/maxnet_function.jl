@@ -23,7 +23,8 @@ end
 
 """
     maxnet(
-        presences, predictors, [features];
+        presences, predictors; 
+        [features],
         regularization_multiplier, regularization_function,
         addsamplestobackground, weight_factor, backend, 
         kw...
@@ -36,19 +37,27 @@ end
 # Keywords
 - `features`: Either:
     - A `Vector` of `AbstractFeatureClass` type features; or
-    - A string where "l" = linear and categorical, "q" = quadratic, "p" = product, "t" = threshold, "h" = hinge; or
-    - Nothing, in which case the default features based on the number of presences are used
+    - A `String` where "l" = linear and categorical, "q" = quadratic, "p" = product, "t" = threshold, "h" = hinge (e.g. "lqh"); or
+    - The default, in which case the features are based on the number of presences are used. See [`default_features`](@ref)
 - `regularization_multiplier`: A constant to adjust regularization, where a higher `regularization_multiplier` results in a higher penalization for features
 - `regularization_function`: A function to compute a regularization for each feature. A default `regularization_function` is built in.
 - `addsamplestobackground`: A boolean, where `true` adds the background samples to the predictors. Defaults to `true`.
 - `n_knots`: the number of knots used for Threshold and Hinge features. Defaults to 50. Ignored if there are neither Threshold nor Hinge features
-- `weight_factor`: A `Float64` to adjust the weight of the background samples. Defaults to 100.0.
-- `backend`: Either `LassoBackend()` or `GLMNetBackend()`, to use Lasso.jl or GLMNet.jl fit the model.
+- `weight_factor`: A `Float64` value to adjust the weight of the background samples. Defaults to 100.0.
+- `backend`: Either `LassoBackend()` or `GLMNetBackend()`, to use either Lasso.jl or GLMNet.jl to fit the model.
 Lasso.jl is written in pure julia, but can be slower with large model matrices (e.g. when hinge is enabled). Defaults to `LassoBackend`.
-- `kw...`: Further arguments to be passed to Lasso.fit or GLMNet.glmnet
+- `kw...`: Further arguments to be passed to `Lasso.fit` or `GLMNet.glmnet`
 
 # Returns
 - `model`: A model of type `MaxnetModel`
+
+# Examples
+```jldoctest
+    using Maxnet
+    p_a, env = Maxnet.bradypus()
+
+    bradypus_model = maxnet(p_a, env; features = "lq", backend = GLMNetBackend());
+```	
 
 """
 function maxnet(
