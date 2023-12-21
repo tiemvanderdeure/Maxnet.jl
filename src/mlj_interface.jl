@@ -51,6 +51,15 @@ function MMI.fit(m::MaxnetBinaryClassifier, verbosity::Int, X, y)
 
     decode = MMI.classes(y)
     cache = nothing
+    
+    features = selected_features(fitresult)
+    vars_included = mapreduce(_var_keys, (x, y) -> unique(vcat(x, y)), features)
+
+    report = Dict(
+        :complexity => length(features),
+        :selected_variables => vars_included,
+        :selected_features => features       
+    )
 
     return (fitresult, decode), cache, report
 end
