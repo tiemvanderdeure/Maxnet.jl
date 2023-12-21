@@ -25,8 +25,8 @@ function predict(m::MaxnetModel, x; link = CloglogLink(), clamp = false)
 
     # clamp the predictors
     if clamp
-        for k in keys(m.extrema)
-            predictors[k] .= Base.clamp.(predictors[k], m.extrema[k]...)
+        for k in m.continuous_predictors
+            predictors[k] .= Base.clamp.(predictors[k], extrema(m.predictor_data[k])...)
         end
     end
 
