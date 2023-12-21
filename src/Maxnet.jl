@@ -4,10 +4,10 @@ import Tables, Lasso, GLMNet, Interpolations, CategoricalArrays, GLM, SparseArra
 import StatsAPI, StatsBase, Statistics
 import MLJModelInterface as MMI
 
-using GLM: IdentityLink, CloglogLink, LogitLink
+using GLM: IdentityLink, CloglogLink, LogitLink, LogLink
 using MLJModelInterface: Continuous, Binary, Multiclass, Count
 
-export IdentityLink, CloglogLink, LogitLink # re-export relevant links
+export IdentityLink, CloglogLink, LogitLink, LogLink # re-export relevant links
 export LassoBackend, GLMNetBackend
 export maxnet, predict
 export LinearFeature, CategoricalFeature, QuadraticFeature, ProductFeature, ThresholdFeature, HingeFeature
