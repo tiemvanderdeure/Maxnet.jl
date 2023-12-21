@@ -1,11 +1,24 @@
 struct MaxnetModel 
     path
     features
+    columns
     coefs
     alpha
     entropy
-    keys_categorical
-    keys_continuous
+    predictor_data
+    categorical_predictors
+    continuous_predictors
+end
+
+function Base.show(io::IO, mime::MIME"text/plain", m::MaxnetModel)
+    vars_selected = mapreduce(Maxnet._var_keys, (x, y) -> unique(vcat(x, y)), selected_features(m))
+
+    println(io, "Fit Maxnet model")
+    
+    println(io, "Features classes: $(m.features)")
+    println(io, "Entropy: $(m.entropy)")
+    println(io, "Model complexity: $(length(m.coefs.nzval))")
+    println(io, "Variables selected: $vars_selected")
 end
 
 """
@@ -18,34 +31,77 @@ end
 
 # Arguments
 - `presences`: A `BitVector` where presences are `true` and background samples are `false`
-- `predictors`: A Tables.jl-compatible table of predictors. Categorical predictors should be of type `CategoricalVector`
+- `predictors`: A Tables.jl-compatible table of predictors. Categorical predictors should be `CategoricalVector`s
+
+# Keywords
 - `features`: Either:
     - A `Vector` of `AbstractFeatureClass` type features; or
     - A string where "l" = linear and categorical, "q" = quadratic, "p" = product, "t" = threshold, "h" = hinge; or
     - Nothing, in which case the default features based on the number of presences are used
-
-# Keywords
 - `regularization_multiplier`: A constant to adjust regularization, where a higher `regularization_multiplier` results in a higher penalization for features
 - `regularization_function`: A function to compute a regularization for each feature. A default `regularization_function` is built in.
 - `addsamplestobackground`: A boolean, where `true` adds the background samples to the predictors. Defaults to `true`.
+- `n_knots`: the number of knots used for Threshold and Hinge features. Defaults to 50. Ignored if there are neither Threshold nor Hinge features
 - `weight_factor`: A `Float64` to adjust the weight of the background samples. Defaults to 100.0.
 - `backend`: Either `LassoBackend()` or `GLMNetBackend()`, to use Lasso.jl or GLMNet.jl fit the model.
 Lasso.jl is written in pure julia, but can be slower with large model matrices (e.g. when hinge is enabled). Defaults to `LassoBackend`.
-- keys_categorical
 - `kw...`: Further arguments to be passed to Lasso.fit or GLMNet.glmnet
 
 # Returns
 - `model`: A model of type `MaxnetModel`
 
 """
+function maxnet(
+    presences::BitVector, predictors; 
+    features = default_features(sum(presences)),
+    regularization_multiplier::Float64 = 1.0,
+    regularization_function = default_regularization,
+    addsamplestobackground::Bool = true, weight_factor::Float64 = 100.,
+    n_knots::Int = 50,
+    backend::MaxnetBackend = LassoBackend(),
+    kw...)
+    
+    _maxnet(
+        presences, 
+        predictors, 
+        features,
+        regularization_multiplier, 
+        regularization_function,
+        addsamplestobackground,
+        weight_factor,
+        n_knots,
+        backend;
+        kw...
+    )
+end
+#maxnet(presences, predictors; kw...) = maxnet(presences, predictors, features; kw...)
 
-function maxnet(presences::BitVector, predictors, features::Vector{<:AbstractFeatureClass};
-                regularization_multiplier::Float64 = 1.0,
-                regularization_function = default_regularization,
-                addsamplestobackground::Bool = true, weight_factor::Float64 = 100.,
-                backend::MaxnetBackend = LassoBackend(),
-                keys_categorical = Tables.schema(predictors).names[findall(Tables.schema(predictors).types .<: CategoricalArrays.CategoricalValue)],
-                kw...)
+### internal methods where features is not a keyword
+
+# If features is a string, parse it
+function _maxnet(presences::BitArray, predictors, features::String, args...; kw...)
+    # automatically select if features is an empty string
+    if features == ""
+        _maxnet(presences, predictors, default_features(length(presences)), args...; kw...)
+    else
+        _maxnet(
+            presences, predictors, features_from_string(features),
+            args...; kw...
+        )
+    end
+end
+
+function _maxnet(
+    presences::BitVector, 
+    predictors, 
+    features::Vector{<:AbstractFeatureClass},
+    regularization_multiplier::Float64,
+    regularization_function,
+    addsamplestobackground::Bool, 
+    weight_factor::Float64,
+    n_knots::Int,
+    backend::MaxnetBackend;
+    kw...)
 
     # check if predictors is a table
     Tables.istable(predictors) || throw(ArgumentError("predictors must be a Tables.jl-compatible table"))
@@ -57,6 +113,7 @@ function maxnet(presences::BitVector, predictors, features::Vector{<:AbstractFea
     end
 
     # divide predictors into continuous and categorical
+    keys_categorical = Tables.schema(predictors).names[findall(Tables.schema(predictors).types .<: CategoricalArrays.CategoricalValue)]
     keys_continuous = Tuple(key for key in keys(predictors) if ~(key in keys_categorical))
     continuous_predictors = predictors[keys_continuous]
     categorical_predictors = predictors[keys_categorical]
@@ -71,21 +128,16 @@ function maxnet(presences::BitVector, predictors, features::Vector{<:AbstractFea
         filter!(f -> f == CategoricalFeature(), features)
     end
 
-    # Get a matrix for each feature
-    ms = map(features) do fe
-        feature_cols(continuous_predictors, categorical_predictors, fe, 10)
+    # Specify each column
+    columns = mapreduce(vcat, features) do feature
+        _feature_columns(continuous_predictors, categorical_predictors, feature, n_knots)
     end
     
     # combine all into one model matrix
-    mm = reduce(hcat, ms)
-
-    # Get the feature class for each column in the model matrix
-    column_feature_classes = mapreduce(vcat, ms, features) do m, fe
-        repeat([fe], size(m, 2))
-    end
+    mm = _model_matrix(predictors, columns)
 
     # Generate regularization
-    reg = regularization_function(mm, column_feature_classes, presences) .* regularization_multiplier
+    reg = regularization_function(mm, getfield.(columns, :feature), presences) .* regularization_multiplier
 
     # Generate weights, 1 for presences, weightfactor for absences
     weights = presences .* 1. .+ (1 .- presences) .* weight_factor
@@ -97,7 +149,7 @@ function maxnet(presences::BitVector, predictors, features::Vector{<:AbstractFea
     lassopath = fit_lasso_path(backend, mm, presences, wts = weights, penalty_factor = reg, λ = λ)
     
     # get the coefficients out
-    coefs = get_coefs(lassopath)[:, end]
+    coefs = SparseArrays.sparse(get_coefs(lassopath)[:, end])
 
     # calculate alpha, entropy
     bg = view(mm, .~presences, :) # matrix for background points
@@ -112,28 +164,13 @@ function maxnet(presences::BitVector, predictors, features::Vector{<:AbstractFea
     return MaxnetModel(
         lassopath,
         features,
+        columns,
         coefs,
         alpha,
         entropy,
+        predictors,
         keys_categorical,
         keys_continuous
     )
 end
-
-function maxnet(presences, predictors, features::String;
-    kw...)
-
-    # automatically select if features is an empty string
-    if features == ""
-        maxnet(presences, predictors; kw...)
-    else
-        maxnet(
-            presences, predictors, 
-            features_from_string(features);
-            kw...)
-    end
-end
-
-# if no features given, default dependent on the number of presences
-maxnet(presences, predictors; kw...) = maxnet(presences, predictors, default_features(sum(presences)); kw...)
 
