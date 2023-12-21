@@ -1,34 +1,48 @@
-using Maxnet, Test, MLJBase
+using Maxnet, Test, MLJBase, Statistics
 
 p_a, env = Maxnet.bradypus()
+env1 = map(e -> [e[1]], env)
 
 @testset "utils" begin
     @test_throws ErrorException Maxnet.features_from_string("a")
+    @test Maxnet.features_from_string("l") == [LinearFeature(), CategoricalFeature()]
+    @test Maxnet.features_from_string("q") == [QuadraticFeature()]
 end
 
 @testset "Maxnet" begin
-    model_glmnet = Maxnet.maxnet(Bool.(p_a), env, "lq"; backend = GLMNetBackend());
-    model_lasso = Maxnet.maxnet(Bool.(p_a), env, "lq"; backend = LassoBackend());
+    # test both backends work
+    model_glmnet = Maxnet.maxnet((p_a), env; features = "lq", backend = GLMNetBackend());
+    model_lasso = Maxnet.maxnet((p_a), env; features = "lq", backend = LassoBackend());
 
-    pred_glmnet = Maxnet.predict(model_glmnet, env)
-    pred_lasso = Maxnet.predict(model_lasso, env)
+    # test both backends come up with approximately the same result
+    @test all(isapprox.(model_glmnet.coefs, model_lasso.coefs; rtol = 0.1, atol = 0.1))
+    @test Statistics.cor(model_glmnet.coefs, model_lasso.coefs) > 0.99
 
-    # no classes
-    model_lasso = Maxnet.maxnet(Bool.(p_a), env; backend = LassoBackend());
-
-    # each class
-    Maxnet.maxnet(Bool.(p_a), env, "l"; backend = LassoBackend());
-    Maxnet.maxnet(Bool.(p_a), env, "q"; backend = LassoBackend());
-    Maxnet.maxnet(Bool.(p_a), env, "p"; backend = LassoBackend());
-    Maxnet.maxnet(Bool.(p_a), env, "h"; backend = LassoBackend());
-    Maxnet.maxnet(Bool.(p_a), env, "t"; backend = LassoBackend());
+    # select classes automatically
+    Maxnet.maxnet(p_a, env; backend = LassoBackend());
 
     # some class combinations
-    Maxnet.maxnet(Bool.(p_a), env, "lq"; backend = LassoBackend());
-    Maxnet.maxnet(Bool.(p_a), env, "lqp"; backend = LassoBackend());
-    Maxnet.maxnet(Bool.(p_a), env, "lqh"; backend = LassoBackend());
-    Maxnet.maxnet(Bool.(p_a), env, "lqph"; backend = LassoBackend());
-    Maxnet.maxnet(Bool.(p_a), env, "lqpt"; backend = LassoBackend());
+    Maxnet.maxnet(p_a, env; features = "lq", backend = LassoBackend());
+    Maxnet.maxnet(p_a, env; features = "lqp", regularization_multiplier = 2., backend = LassoBackend());
+    Maxnet.maxnet(p_a, env; features = "lqh", regularization_multiplier = 5., backend = LassoBackend());
+    Maxnet.maxnet(p_a, env; features = "lqph", backend = LassoBackend());
+    Maxnet.maxnet(p_a, env; features = "lqpt", backend = LassoBackend());
+
+    # predictions
+    prediction = Maxnet.predict(model_lasso, env)
+    @test Statistics.mean(prediction[p_a]) > Statistics.mean(prediction[.~p_a])
+    @test minimum(prediction) > 0.
+    @test maximum(prediction) < 1.
+
+    # clamp shouldn't change anything in this case
+    @test all(prediction .== Maxnet.predict(model_lasso, env; clamp = true))
+    
+    # predict with a crazy extrapolation
+    env1_extrapolated = merge(env1, (;cld6190_ann = [100_000]))
+    # without clamp the prediction is crazy
+    @test abs(Maxnet.predict(model_lasso, env1_extrapolated; link = IdentityLink())[1]) > 100_000.
+    # without clamp the prediction is reasonable
+    @test abs(Maxnet.predict(model_lasso, env1_extrapolated; link = IdentityLink(), clamp = true)[1]) < 5.
 end
 
 @testset "MLJ" begin
@@ -45,9 +59,12 @@ end
     mach2 = machine(mn(features = "lqph", backend = GLMNetBackend()), env_typed, categorical(p_a))
     fit!(mach2)
     
-    @test mach2.fitresult[1].path isa Maxnet.GLMNet.GLMNetPath
-
     # predict via MLJBase
-    t = pdf.(MLJBase.predict(mach2, env_typed), true)
+    mljprediction = MLJBase.predict(mach2, env_typed)
+    mlj_true_probability = pdf.(mljprediction, true)
+
+    @test Statistics.mean(mlj_true_probability[p_a]) > Statistics.mean(mlj_true_probability[.~p_a])
+    @test minimum(mlj_true_probability) > 0.
+    @test maximum(mlj_true_probability) < 1.
 end
 
