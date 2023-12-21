@@ -15,7 +15,7 @@ function fit_lasso_path(
     backend::GLMNetBackend, mm, presences;
     wts, penalty_factor, λ, kw...) 
 
-    presence_matrix = [presences 1 .- presences]
+    presence_matrix = [1 .- presences presences]
     GLMNet.glmnet(
         mm, presence_matrix, GLMNet.Binomial(); 
         weights = wts, penalty_factor = penalty_factor, lambda = λ, standardize = false)
