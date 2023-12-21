@@ -25,8 +25,9 @@ function MaxnetBinaryClassifier(;
     kw...
 )
     MaxnetBinaryClassifier(
-        features, 
-        regularization_multiplier, regularization_function, weight_factor, backend, link, kw)
+        features, regularization_multiplier, regularization_function, 
+        weight_factor, backend, link, kw
+    )
 end
 
 MMI.input_scitype(::Type{<:MaxnetBinaryClassifier}) =
@@ -40,20 +41,15 @@ function MMI.fit(m::MaxnetBinaryClassifier, verbosity::Int, X, y)
     # convert categorical to boolean
     y_boolean = Bool.(MMI.int(y) .- 1)
 
-    # Find names of categorical columns
-    keys_categorical = MMI.schema(X).names[findall(MMI.schema(X).scitypes .<: Union{Multiclass, Binary})]
-
     fitresult = maxnet(
-        y_boolean, X, m.features; 
-        keys_categorical = keys_categorical, 
+        y_boolean, X; m.features,
         regularization_multiplier = m.regularization_multiplier,
         regularization_function = m.regularization_function,
         weight_factor = m.weight_factor,
         backend = m.backend,
         m.kw...)
 
-    decode = y[1]
-    report = nothing
+    decode = MMI.classes(y)
     cache = nothing
 
     return (fitresult, decode), cache, report
@@ -61,5 +57,5 @@ end
 
 function MMI.predict(m::MaxnetBinaryClassifier, (fitresult, decode), Xnew)
     p = predict(fitresult, Xnew; link = m.link)
-    MMI.UnivariateFinite(MMI.classes(decode), [1 .- p, p])
+    MMI.UnivariateFinite(decode, [1 .- p, p])
 end
