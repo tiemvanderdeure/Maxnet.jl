@@ -38,33 +38,3 @@ function default_features(np)
         append!(features, [ProductFeature()])
     end
 end
-
-# The whole thing without statsmodels - translate namedtuple directly into matrices
-feature_cols(cont_vars, cat_vars, ::LinearFeature, nk) = reduce(hcat, cont_vars)
-feature_cols(cont_vars, cat_vars, ::CategoricalFeature, nk) = mapreduce(x -> permutedims(CategoricalArrays.levels(x)) .== x, hcat, cat_vars)
-feature_cols(cont_vars, cat_vars, ::QuadraticFeature, nk) = mapreduce(x -> x.^2, hcat, cont_vars)
-
-function feature_cols(continuous_vars, cat_vars, ::ProductFeature, nk)
-    # loop over all combinations, generate an interaction term, and add these together
-    product_terms = mapreduce(hcat, 1:(length(continuous_vars)-1)) do i
-        mapreduce(hcat, i+1:length(continuous_vars)) do j
-            continuous_vars[i] .* continuous_vars[j]
-        end
-    end
-    return product_terms
-end
-
-function feature_cols(continuous_predictors, cat_pred, ::HingeFeature, nknots = 50)
-    mapreduce(hcat, continuous_predictors) do pred
-        Maxnet.hinge(pred)
-    end
-end
-
-function feature_cols(continuous_predictors, cat_pred, ::ThresholdFeature, nknots = 50)
-    mat = mapreduce(hcat, continuous_predictors) do pred
-        Maxnet.hinge(pred, nknots)
-    end
-
-    return mat
-end
-
