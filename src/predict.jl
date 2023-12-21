@@ -1,5 +1,5 @@
 """"
-    predict(m, x; link)
+    predict(m, x; link, clamp)
 
     Use a fit maxnet model to predict
 
@@ -8,12 +8,14 @@
 - `x`: a Tables.jl-compatible table of predictors. All columns that were used to fit `m` should be present in `x`
 
 # Keywords
-- `link`: the link function used. Defaults to CloglogLink(), which is the default on Maxent since version 4.X.
-    An alternative is LogitLink(), which was the Maxent default on earlier versions
-- `clamp`: If `true`, clamp to limit the predictors to the range the model was trained on. Defaults to `false`.
+- `link`: the link function used. Defaults to CloglogLink(), which is the default on the Maxent Java appliation since version 4.3.
+    Alternatively, LogitLink() was the Maxent default on earlier versions. 
+    To get exponential output, which can be interpreted as predicted abundance, use LogLink()
+    IdentityLink() returns the exponent without any transformation.
+- `clamp`: If `true`, values in `x` will be clamped to the range the model was trained on. Defaults to `false`.
 
 # Returns
-A `Vector` of 
+A `Vector` of prediction values.
 
 """
 
