@@ -24,21 +24,21 @@ end
 """
     maxnet(
         presences, predictors; 
-        [features],
-        regularization_multiplier, regularization_function,
+        features, regularization_multiplier, regularization_function,
         addsamplestobackground, weight_factor, backend, 
         kw...
     )
+
+    Fit a model using the maxnet algorithm.
 
 # Arguments
 - `presences`: A `BitVector` where presences are `true` and background samples are `false`
 - `predictors`: A Tables.jl-compatible table of predictors. Categorical predictors should be `CategoricalVector`s
 
 # Keywords
-- `features`: Either:
-    - A `Vector` of `AbstractFeatureClass` type features; or
-    - A `String` where "l" = linear and categorical, "q" = quadratic, "p" = product, "t" = threshold, "h" = hinge (e.g. "lqh"); or
-    - The default, in which case the features are based on the number of presences are used. See [`default_features`](@ref)
+- `features`: Either a `Vector` of `AbstractFeatureClass` to be used in the model, 
+    or a `String` where "l" = linear and categorical, "q" = quadratic, "p" = product, "t" = threshold, "h" = hinge (e.g. "lqh"); or
+    By default, the features are based on the number of presences are used. See [`default_features`](@ref)
 - `regularization_multiplier`: A constant to adjust regularization, where a higher `regularization_multiplier` results in a higher penalization for features
 - `regularization_function`: A function to compute a regularization for each feature. A default `regularization_function` is built in.
 - `addsamplestobackground`: A boolean, where `true` adds the background samples to the predictors. Defaults to `true`.
@@ -53,10 +53,18 @@ Lasso.jl is written in pure julia, but can be slower with large model matrices (
 
 # Examples
 ```jldoctest
-    using Maxnet
-    p_a, env = Maxnet.bradypus()
+using Maxnet
+p_a, env = Maxnet.bradypus()
 
-    bradypus_model = maxnet(p_a, env; features = "lq", backend = GLMNetBackend());
+bradypus_model = maxnet(p_a, env; features = "lq", backend = GLMNetBackend())
+
+# output
+
+Fit Maxnet model
+Features classes: Maxnet.AbstractFeatureClass[LinearFeature(), CategoricalFeature(), QuadraticFeature()]
+Entropy: 6.114650341746531
+Model complexity: 21
+Variables selected: [:frs6190_ann, :h_dem, :pre6190_l1, :pre6190_l10, :pre6190_l4, :pre6190_l7, :tmn6190_ann, :vap6190_ann, :ecoreg, :cld6190_ann, :dtr6190_ann, :tmx6190_ann]
 ```	
 
 """

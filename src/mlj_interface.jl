@@ -30,10 +30,10 @@ end
         
     Use `MaxnetBinaryClassifier()` to create an instance with default parameters, or use keyword arguments to specify parameters.
     
-    The `link` and `clamp` keywords are passed to `predict`. All other keywords are passed to `maxnet` when te model is fit.
+    All keywords are passed to `maxnet` when calling `fit!` on a machine of this model type.
     See the documentation of [`maxnet`](@ref) for the parameters and their defaults.
 
-    # Examples
+    # Example
     ```jldoctest
     using Maxnet, MLJBase
     p_a, env = Maxnet.bradypus()
@@ -41,6 +41,7 @@ end
     mach = machine(MaxnetBinaryClassifier(features = "lqp"), env, categorical(p_a))
     fit!(mach)
     yhat = MLJBase.predict(mach, env)
+    # output
     ```
 
 """
@@ -80,7 +81,8 @@ function MMI.fit(m::MaxnetBinaryClassifier, verbosity::Int, X, y)
     return (fitresult, decode), cache, report
 end
 
-function MMI.predict(m::MaxnetBinaryClassifier, (fitresult, decode), Xnew)
-    p = predict(fitresult, Xnew; link = m.link, clamp = m.clamp)
+function MMI.predict(m::MaxnetBinaryClassifier, (fitresult, decode), Xnew; 
+    link = Cloglog(), clamp = false)
+    p = predict(fitresult, Xnew; link = link, clamp = clamp)
     MMI.UnivariateFinite(decode, [1 .- p, p])
 end

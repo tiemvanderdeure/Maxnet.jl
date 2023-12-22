@@ -1,6 +1,8 @@
 """
     predict(m, x; link, clamp)
 
+    Use a maxnet model to predict on new data.
+
 # Arguments
 - `m`: a MaxnetModel as returned by `maxnet`
 - `x`: a `Tables.jl`-compatible table of predictors. All columns that were used to fit `m` should be present in `x`
