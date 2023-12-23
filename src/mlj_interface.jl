@@ -82,7 +82,7 @@ function MMI.fit(m::MaxnetBinaryClassifier, verbosity::Int, X, y)
 end
 
 function MMI.predict(m::MaxnetBinaryClassifier, (fitresult, decode), Xnew; 
-    link = Cloglog(), clamp = false)
+    link = CloglogLink(), clamp = false)
     p = predict(fitresult, Xnew; link = link, clamp = clamp)
     MMI.UnivariateFinite(decode, [1 .- p, p])
 end
