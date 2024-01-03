@@ -1,13 +1,13 @@
 struct MaxnetModel 
-    path
-    features
-    columns
-    coefs
-    alpha
-    entropy
+    path::Union{GLMNet.GLMNetPath, Lasso.LassoPath}
+    features::Vector{<:AbstractFeatureClass}
+    columns::Vector{ModelMatrixColumn}
+    coefs::AbstractVector
+    alpha::Float64
+    entropy::Float64
     predictor_data
-    categorical_predictors
-    continuous_predictors
+    categorical_predictors::NTuple{<:Any, Symbol}
+    continuous_predictors::NTuple{<:Any, Symbol}
 end
 
 function Base.show(io::IO, mime::MIME"text/plain", m::MaxnetModel)
@@ -21,4 +21,5 @@ function Base.show(io::IO, mime::MIME"text/plain", m::MaxnetModel)
     println(io, "Variables selected: $vars_selected")
 end
 
+"Get the number of non-zero coefficients in the model"
 complexity(m::MaxnetModel) = length(m.coefs.nzval)
