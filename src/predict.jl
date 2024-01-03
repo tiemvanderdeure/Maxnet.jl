@@ -17,6 +17,13 @@
 # Returns
 A `Vector` with the resulting predictions.
 
+# Example
+```julia
+using Maxnet
+p_a, env = Maxnet.bradypus();
+bradypus_model = maxnet(p_a, env; features = "lq")
+prediction = Maxnet.predict(bradypus_model, env)
+```
 """
 function predict(m::MaxnetModel, x; link = CloglogLink(), clamp = false)
     predictors = Tables.columntable(x)
