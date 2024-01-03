@@ -1,26 +1,3 @@
-struct MaxnetModel 
-    path
-    features
-    columns
-    coefs
-    alpha
-    entropy
-    predictor_data
-    categorical_predictors
-    continuous_predictors
-end
-
-function Base.show(io::IO, mime::MIME"text/plain", m::MaxnetModel)
-    vars_selected = mapreduce(Maxnet._var_keys, (x, y) -> unique(vcat(x, y)), selected_features(m))
-
-    println(io, "Fit Maxnet model")
-    
-    println(io, "Features classes: $(m.features)")
-    println(io, "Entropy: $(m.entropy)")
-    println(io, "Model complexity: $(length(m.coefs.nzval))")
-    println(io, "Variables selected: $vars_selected")
-end
-
 """
     maxnet(
         presences, predictors; 
@@ -52,13 +29,10 @@ Lasso.jl is written in pure julia, but can be slower with large model matrices (
 - `model`: A model of type `MaxnetModel`
 
 # Examples
-```jldoctest
+```julia
 using Maxnet
-p_a, env = Maxnet.bradypus()
-
+p_a, env = Maxnet.bradypus();
 bradypus_model = maxnet(p_a, env; features = "lq", backend = GLMNetBackend())
-
-# output
 
 Fit Maxnet model
 Features classes: Maxnet.AbstractFeatureClass[LinearFeature(), CategoricalFeature(), QuadraticFeature()]

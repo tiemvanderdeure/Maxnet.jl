@@ -9,17 +9,17 @@ using MLJModelInterface: Continuous, Binary, Multiclass, Count
 
 export IdentityLink, CloglogLink, LogitLink, LogLink # re-export relevant links
 export LassoBackend, GLMNetBackend
-export maxnet, predict
+export maxnet, predict, complexity
 export LinearFeature, CategoricalFeature, QuadraticFeature, ProductFeature, ThresholdFeature, HingeFeature
 export MaxnetBinaryClassifier
 
-# Write your package code here.
 
 include("utils.jl")
 include("lasso.jl")
 include("feature_classes.jl")
 include("model_matrix.jl")
 include("regularization.jl")
+include("MaxnetModel.jl")
 include("maxnet_function.jl")
 include("predict.jl")
 include("response_curves.jl")
