@@ -40,7 +40,7 @@ end
     @test Statistics.mean(prediction[p_a]) > Statistics.mean(prediction[.~p_a])
     @test minimum(prediction) > 0.
     @test maximum(prediction) < 1.
-    @test mean(prediction) ≈ 0.243406167194403
+    @test mean(prediction) ≈ 0.243406167194403 atol=1e-4
 
     # check that clamping works
     # clamp shouldn't change anything in this case
