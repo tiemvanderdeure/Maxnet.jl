@@ -11,11 +11,15 @@ makedocs(;
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://tiemvanderdeure.github.io/Maxnet.jl",
-        edit_link="master",
         assets=String[],
     ),
     pages=[
         "Home" => "index.md",
+        "Usage" => Any[
+            "Basic usage" => "usage/basic.md",
+            "MLJ" => "usage/mlj.md",
+        ],
+        "API reference" => "reference/api.md"
     ],
 )
 
