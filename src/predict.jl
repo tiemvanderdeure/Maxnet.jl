@@ -27,8 +27,8 @@ prediction = Maxnet.predict(bradypus_model, env)
 """
 function predict(m::MaxnetModel, x; link = CloglogLink(), clamp = false)
     predictors = Tables.columntable(x)
-    for k in keys(predictors)
-        k in keys(m.predictor_data) || error("$k is not found in the predictors")
+    for k in keys(m.predictor_data)
+        k in keys(predictors) || error("$k is not found in the predictors")
     end
 
     # clamp the predictors
