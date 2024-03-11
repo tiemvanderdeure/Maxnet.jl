@@ -19,7 +19,7 @@ end
 function _feature_columns(cont_vars, cat_vars, f::ProductFeature, nk)
     ks = keys(cont_vars)
     n = length(cont_vars)
-    mapreduce(vcat, 1:(n-1)) do i
+    mapreduce(vcat, 1:(n-1); init = Maxnet.ModelMatrixColumn[]) do i
         mapreduce(vcat, i+1:n) do j
             ModelMatrixColumn(f, ks[i], (ks[j], ))
         end
