@@ -1,7 +1,0 @@
-```@meta
-CurrentModule = Maxnet
-```
-
-# Usage
-
-

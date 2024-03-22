@@ -16,7 +16,7 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Usage" => Any[
-            "Basic usage" => "usage/basic.md",
+            "Quick start" => "usage/quickstart.md",
             "MLJ" => "usage/mlj.md",
         ],
         "API reference" => "reference/api.md"
