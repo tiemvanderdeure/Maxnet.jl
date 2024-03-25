@@ -1,9 +1,22 @@
-# maxnet
-This is a pure Julia implementation of the [maxnet algorithm](https://github.com/mrmaxent/maxnet).
+# Maxnet
+This is a Julia implementation of the [maxnet algorithm](https://github.com/mrmaxent/maxnet), with all core functionality in the original R package.
 
-Maxnet is closely related to the java MaxEnt application, which is widely used in species distribution modelling. It was developped by Steven Philips. Please see [this publication](https://doi.org/10.1111/ecog.03049) for more details about the maxnet algorithm.
+Maxnet transforms input data in various ways and then uses the GLMnet algorithm to fit a lasso path, selecting the best variables and transformations.
 
-Also see the Maxent page on the site of the [American Museum for Natural History](https://biodiversityinformatics.amnh.org/open_source/maxent/)
+Maxnet is closely related to the Java MaxEnt application, which is widely used in species distribution modelling. It was developped by Steven Philips. See [this publication](https://doi.org/10.1111/ecog.03049) for more details about maxnet.
+
+Also see the Maxent page on the site of the [American Museum for Natural History](https://biodiversityinformatics.amnh.org/open_source/maxent/).
+
+A basic example, using a toy dataset included in the package:
+```julia
+using Maxnet
+p_a, env = Maxnet.bradypus()
+bradypus_model = maxnet(p_a, env)
+prediction = predict(bradypus_model, env)
+```
+
+Maxnet integrates with [MLJ](https://github.com/alan-turing-institute/MLJ.jl) through the `MaxnetBinaryClassifier` type.
+
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://tiemvanderdeure.github.io/Maxnet.jl/stable/)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://tiemvanderdeure.github.io/Maxnet.jl/dev/)
