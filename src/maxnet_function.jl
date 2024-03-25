@@ -43,7 +43,7 @@ Variables selected: [:frs6190_ann, :h_dem, :pre6190_l1, :pre6190_l10, :pre6190_l
 function maxnet(
     presences::BitVector, predictors; 
     features = default_features(sum(presences)),
-    regularization_multiplier::Float64 = 1.0,
+    regularization_multiplier = 1.0,
     regularization_function = default_regularization,
     addsamplestobackground::Bool = true, weight_factor::Float64 = 100.,
     n_knots::Int = 50,
@@ -82,7 +82,7 @@ function _maxnet(
     presences::BitVector, 
     predictors, 
     features::Vector{<:AbstractFeatureClass},
-    regularization_multiplier::Float64,
+    regularization_multiplier,
     regularization_function,
     addsamplestobackground::Bool, 
     weight_factor::Float64,
