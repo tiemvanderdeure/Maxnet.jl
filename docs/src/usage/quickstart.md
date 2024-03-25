@@ -26,7 +26,7 @@ bradypus_model = maxnet(p_a, env)
 prediction = predict(bradypus_model, env)
 ```
 
-There are numerous settings that can be tweaked to change the model fit. These are documentated in the documentatoin for the `maxnet`(@ref) and `Maxnet.predict`(@ref) functions.
+There are numerous settings that can be tweaked to change the model fit. These are documentated in the documentation for the `maxnet`(@ref) and `predict`(@ref) functions.
 
 ### Model settings
 The two most important settings to change when running Maxnet is the feature classes selected and the regularization factor.
