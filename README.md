@@ -9,7 +9,7 @@ This is a Julia implementation of the [maxnet algorithm](https://github.com/mrma
 
 Maxnet transforms input data in various ways and then uses the GLMnet algorithm to fit a lasso path, selecting the best variables and transformations.
 
-Maxnet is closely related to the Java MaxEnt application, which is widely used in species distribution modelling. It was developped by Steven Philips. See [this publication](https://doi.org/10.1111/ecog.03049) for more details about maxnet.
+Maxnet is closely related to the Java MaxEnt application, which is widely used in species distribution modelling. Maxnet was introduced in [this publication](https://doi.org/10.1111/ecog.03049), which goes more into details about the algorithm.
 
 Also see the Maxent page on the site of the [American Museum for Natural History](https://biodiversityinformatics.amnh.org/open_source/maxent/).
 
