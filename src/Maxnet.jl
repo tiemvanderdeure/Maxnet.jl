@@ -21,7 +21,6 @@ include("regularization.jl")
 include("types.jl")
 include("maxnet_function.jl")
 include("predict.jl")
-include("response_curves.jl")
 include("data.jl")
 include("mlj_interface.jl")
 
