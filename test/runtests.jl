@@ -1,4 +1,4 @@
-using Maxnet, Test, MLJBase, Statistics
+using Maxnet, Test, Statistics
 
 p_a, env = Maxnet.bradypus()
 env1 = map(e -> [e[1]], env) # just the first row
@@ -28,7 +28,7 @@ end
     @test complexity(m) == 21
 
     # predictions
-    prediction = Maxnet.predict(m, env)
+    prediction = predict(m, env)
     @test Statistics.mean(prediction[p_a]) > Statistics.mean(prediction[.~p_a])
     @test minimum(prediction) > 0.
     @test maximum(prediction) < 1.
@@ -36,18 +36,25 @@ end
 
     # check that clamping works
     # clamp shouldn't change anything in this case
-    @test prediction == Maxnet.predict(m, env; clamp = true)
+    @test prediction == predict(m, env; clamp = true)
     
     # predict with a crazy extrapolation
     env1_extrapolated = merge(env1, (;cld6190_ann = [100_000]))
     env1_max_cld = merge(env1, (;cld6190_ann = [maximum(env.cld6190_ann)]))
 
     # using clamp the prediction uses the highest cloud
-    @test Maxnet.predict(m, env1_extrapolated; link = IdentityLink(), clamp = true) == 
-        Maxnet.predict(m, env1_max_cld; link = IdentityLink()) 
+    @test predict(m, env1_extrapolated; link = IdentityLink(), clamp = true) == 
+        predict(m, env1_max_cld; link = IdentityLink()) 
+
+    # test that maxnet works if no features are selected
+    empty_model = maxnet(p_a, env; regularization_multiplier = 1000);
+    @test complexity(empty_model) == 0
+    @test Maxnet.selected_features(empty_model) == Symbol[]
+    @test length(unique(predict(empty_model, env))) == 1
 end
 
 @testset "MLJ" begin
+    using MLJBase
     mn = Maxnet.MaxnetBinaryClassifier
 
     # convert to continuous
@@ -71,7 +78,7 @@ end
 
     # test that this predicts the same as the equivalent model without mlj
 
-    @test all(Maxnet.predict(model, env_typed) .≈ mlj_true_probability)
+    @test all(predict(model, env_typed) .≈ mlj_true_probability)
 
     @test Statistics.mean(mlj_true_probability[p_a]) > Statistics.mean(mlj_true_probability[.~p_a])
     @test minimum(mlj_true_probability) > 0.
