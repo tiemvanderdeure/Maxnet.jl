@@ -1,18 +1,5 @@
-abstract type MaxnetBackend end
-struct LassoBackend <: MaxnetBackend end
-struct GLMNetBackend <: MaxnetBackend end
-
 function fit_lasso_path(
-    backend::LassoBackend, mm, presences;
-    kw...) 
-
-    Lasso.fit(
-        Lasso.LassoPath, mm, presences, Lasso.Distributions.Binomial(); 
-        standardize = false, irls_maxiter = 1_000, kw...)
-end
-
-function fit_lasso_path(
-    backend::GLMNetBackend, mm, presences;
+    mm, presences;
     wts, penalty_factor, λ, kw...) 
 
     presence_matrix = [1 .- presences presences]
@@ -22,4 +9,3 @@ function fit_lasso_path(
 end
 
 get_coefs(path::GLMNet.GLMNetPath) = path.betas
-get_coefs(path::Lasso.LassoPath) = path.coefs

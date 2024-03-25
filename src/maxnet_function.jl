@@ -2,7 +2,7 @@
     maxnet(
         presences, predictors; 
         features, regularization_multiplier, regularization_function,
-        addsamplestobackground, weight_factor, backend, 
+        addsamplestobackground, weight_factor, 
         kw...
     )
 
@@ -21,9 +21,7 @@
 - `addsamplestobackground`: A boolean, where `true` adds the background samples to the predictors. Defaults to `true`.
 - `n_knots`: the number of knots used for Threshold and Hinge features. Defaults to 50. Ignored if there are neither Threshold nor Hinge features
 - `weight_factor`: A `Float64` value to adjust the weight of the background samples. Defaults to 100.0.
-- `backend`: Either `LassoBackend()` or `GLMNetBackend()`, to use either Lasso.jl or GLMNet.jl to fit the model.
-Lasso.jl is written in pure julia, but can be slower with large model matrices (e.g. when hinge is enabled). Defaults to `LassoBackend`.
-- `kw...`: Further arguments to be passed to `Lasso.fit` or `GLMNet.glmnet`
+- `kw...`: Further arguments to be passed to `GLMNet.glmnet`
 
 # Returns
 - `model`: A model of type `MaxnetModel`
@@ -32,7 +30,7 @@ Lasso.jl is written in pure julia, but can be slower with large model matrices (
 ```julia
 using Maxnet
 p_a, env = Maxnet.bradypus();
-bradypus_model = maxnet(p_a, env; features = "lq", backend = GLMNetBackend())
+bradypus_model = maxnet(p_a, env; features = "lq")
 
 Fit Maxnet model
 Features classes: Maxnet.AbstractFeatureClass[LinearFeature(), CategoricalFeature(), QuadraticFeature()]
@@ -49,7 +47,6 @@ function maxnet(
     regularization_function = default_regularization,
     addsamplestobackground::Bool = true, weight_factor::Float64 = 100.,
     n_knots::Int = 50,
-    backend::MaxnetBackend = LassoBackend(),
     kw...)
     
     _maxnet(
@@ -60,8 +57,7 @@ function maxnet(
         regularization_function,
         addsamplestobackground,
         weight_factor,
-        n_knots,
-        backend;
+        n_knots;
         kw...
     )
 end
@@ -90,8 +86,7 @@ function _maxnet(
     regularization_function,
     addsamplestobackground::Bool, 
     weight_factor::Float64,
-    n_knots::Int,
-    backend::MaxnetBackend;
+    n_knots::Int;
     kw...)
 
     # check if predictors is a table
@@ -137,7 +132,7 @@ function _maxnet(
     λ = lambdas(reg, presences, weights; λmax = 4, n = 200)
 
     # Fit the model
-    lassopath = fit_lasso_path(backend, mm, presences, wts = weights, penalty_factor = reg, λ = λ)
+    lassopath = fit_lasso_path(mm, presences, wts = weights, penalty_factor = reg, λ = λ)
     
     # get the coefficients out
     coefs = SparseArrays.sparse(get_coefs(lassopath)[:, end])

@@ -8,7 +8,6 @@ using GLM: IdentityLink, CloglogLink, LogitLink, LogLink
 using MLJModelInterface: Continuous, Binary, Multiclass, Count
 
 export IdentityLink, CloglogLink, LogitLink, LogLink # re-export relevant links
-export LassoBackend, GLMNetBackend
 export maxnet, predict, complexity
 export LinearFeature, CategoricalFeature, QuadraticFeature, ProductFeature, ThresholdFeature, HingeFeature
 export MaxnetBinaryClassifier

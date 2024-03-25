@@ -3,7 +3,6 @@ mutable struct MaxnetBinaryClassifier <: MMI.Probabilistic
     regularization_multiplier::Float64
     regularization_function
     weight_factor::Float64
-    backend::MaxnetBackend
     link::GLM.Link
     clamp::Bool
     kw
@@ -12,14 +11,14 @@ end
 function MaxnetBinaryClassifier(; 
     features="", 
     regularization_multiplier = 1.0, regularization_function = default_regularization, 
-    weight_factor = 100., backend = LassoBackend(), 
+    weight_factor = 100., 
     link = CloglogLink(), clamp = false,
     kw...
 )
 
     MaxnetBinaryClassifier(
         features, regularization_multiplier, regularization_function, 
-        weight_factor, backend, link, clamp, kw
+        weight_factor, link, clamp, kw
     )
 end
 
@@ -63,7 +62,6 @@ function MMI.fit(m::MaxnetBinaryClassifier, verbosity::Int, X, y)
         regularization_multiplier = m.regularization_multiplier,
         regularization_function = m.regularization_function,
         weight_factor = m.weight_factor,
-        backend = m.backend,
         m.kw...)
 
     decode = MMI.classes(y)
