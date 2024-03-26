@@ -7,14 +7,13 @@ Maxnet.jl integrates with the MLJ ecosystem.
 
 See [MLJs project page](https://github.com/alan-turing-institute/MLJ.jl) for more info about MLJ.
 
-To use Maxnet with MLJ, initialise a model by calling [`MaxnetBinaryClassifier`](@ref), which accepts any arguments otherwise passed to [`maxnet`]. The model can then be used to construct MLJ's `machine`.
+To use Maxnet with MLJ, initialise a model by calling [`MaxnetBinaryClassifier`](@ref), which accepts any arguments otherwise passed to [`maxnet`](@ref). The model can then be used with MLJ's `machine`.
 
 For example:
 
 ```julia
 using Maxnet: MaxnetBinaryClassifier, bradypus
 using MLJBase
-using CategoricalArrays
 
 # sample data
 y, X = bradypus()
@@ -37,5 +36,4 @@ pred_test = predict(mach; rows = test)
 # predict on some new dataset
 pred = predict(mach, X)
 ```
-
 
