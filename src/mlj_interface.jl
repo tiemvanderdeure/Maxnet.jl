@@ -46,12 +46,24 @@ end
 """
 MaxnetBinaryClassifier
 
-MMI.input_scitype(::Type{<:MaxnetBinaryClassifier}) =
-        MMI.Table{<:Union{<:AbstractVector{<:Continuous}, <:AbstractVector{<:Multiclass}}} #{<:Union{<:Continuous <:Multiclass}}
-    
-MMI.target_scitype(::Type{<:MaxnetBinaryClassifier}) = AbstractVector{Multiclass{2}}# AbstractVector{<:MMI.Finite}
+MMI.metadata_pkg(
+    MaxnetBinaryClassifier;
+    name = "Maxnet",
+    uuid = "81f79f80-22f2-4e41-ab86-00c11cf0f26f",
+    url = "https://github.com/tiemvanderdeure/Maxnet.jl",
+    is_pure_julia = false,
+    package_license = "MIT",
+    is_wrapper = false    
+)
 
-MMI.load_path(::Type{<:MaxnetBinaryClassifier}) = "Maxnet.MaxnetBinaryClassifier"
+MMI.metadata_model(
+    MaxnetBinaryClassifier;
+    input_scitype = MMI.Table(MMI.Continuous, MMI.Finite),
+    target_scitype = AbstractVector{<:MMI.Finite{2}},
+    load_path = "Maxnet.MaxnetBinaryClassifier",
+    human_name = "Maxnet",
+    reports_feature_importances=false
+)
 
 function MMI.fit(m::MaxnetBinaryClassifier, verbosity::Int, X, y)
     # convert categorical to boolean
