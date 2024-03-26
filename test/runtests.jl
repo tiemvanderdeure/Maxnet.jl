@@ -87,7 +87,7 @@ end
     @test package_license(mn) == "MIT"
     @test prediction_type(mn) == :probabilistic
     @test input_scitype(mn) == Table{<:Union{AbstractVector{<:Continuous}, AbstractVector{<:Finite}}}
-    @test hyperparameters(mn) == (:features, :regularization_multiplier, :regularization_function, :weight_factor, :link, :clamp, :kw)
+    @test hyperparameters(mn) == (:features, :regularization_multiplier, :regularization_function, :addsamplestobackground, :n_knots, :weight_factor, :link, :clamp, :kw)
 
     # convert to continuous
     cont_keys = collect(key => Continuous for key in keys(env) if key !== :ecoreg)
