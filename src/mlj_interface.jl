@@ -2,6 +2,8 @@ mutable struct MaxnetBinaryClassifier <: MMI.Probabilistic
     features::Union{String, Vector{<:AbstractFeatureClass}}
     regularization_multiplier::Float64
     regularization_function
+    addsamplestobackground::Bool
+    n_knots::Integer
     weight_factor::Float64
     link::GLM.Link
     clamp::Bool
@@ -11,14 +13,14 @@ end
 function MaxnetBinaryClassifier(; 
     features="", 
     regularization_multiplier = 1.0, regularization_function = default_regularization, 
-    weight_factor = 100., 
+    addsamplestobackground = true, n_knots = 50, weight_factor = 100., 
     link = CloglogLink(), clamp = false,
     kw...
 )
 
     MaxnetBinaryClassifier(
         features, regularization_multiplier, regularization_function, 
-        weight_factor, link, clamp, kw
+        addsamplestobackground, n_knots, weight_factor, link, clamp, kw
     )
 end
 
@@ -29,8 +31,8 @@ end
         
     Use `MaxnetBinaryClassifier()` to create an instance with default parameters, or use keyword arguments to specify parameters.
     
-    All keywords are passed to `maxnet` when calling `fit!` on a machine of this model type.
-    See the documentation of [`maxnet`](@ref) for the parameters and their defaults.
+    The keywords `link`, and `clamp` are passed to [`Maxnet.predict`](@ref), while all other keywords are passed to [`maxnet`](@ref).
+    See the documentation of these functions for the meaning of these parameters and their defaults.
 
     # Example
     ```jldoctest
