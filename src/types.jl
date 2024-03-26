@@ -1,5 +1,5 @@
 struct MaxnetModel 
-    path::Union{GLMNet.GLMNetPath, Lasso.LassoPath}
+    path::GLMNet.GLMNetPath
     features::Vector{<:AbstractFeatureClass}
     columns::Vector{ModelMatrixColumn}
     coefs::AbstractVector
