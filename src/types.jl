@@ -1,5 +1,5 @@
 struct MaxnetModel 
-    path::Union{GLMNet.GLMNetPath, Lasso.LassoPath}
+    path::GLMNet.GLMNetPath
     features::Vector{<:AbstractFeatureClass}
     columns::Vector{ModelMatrixColumn}
     coefs::AbstractVector
@@ -11,7 +11,7 @@ struct MaxnetModel
 end
 
 function Base.show(io::IO, mime::MIME"text/plain", m::MaxnetModel)
-    vars_selected = mapreduce(Maxnet._var_keys, (x, y) -> unique(vcat(x, y)), selected_features(m))
+    vars_selected = mapreduce(Maxnet._var_keys, (x, y) -> unique(vcat(x, y)), selected_features(m); init = Symbol[])
 
     println(io, "Fit Maxnet model")
     
