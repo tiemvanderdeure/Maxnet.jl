@@ -48,4 +48,5 @@ function default_features(np)
     if np >= 80
         append!(features, [ProductFeature()])
     end
+    return features
 end
