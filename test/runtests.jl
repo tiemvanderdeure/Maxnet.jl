@@ -14,6 +14,7 @@ env1 = map(e -> [e[1]], env) # just the first row
     @test Maxnet.features_from_string("lqpt") == [LinearFeature(), CategoricalFeature(), QuadraticFeature(), ProductFeature(), ThresholdFeature()]
 
     @test Maxnet.default_features(100) == [LinearFeature(), CategoricalFeature(), QuadraticFeature(), HingeFeature(), ProductFeature()]
+    @test Maxnet.default_features(1) == [LinearFeature(), CategoricalFeature()]
 
     @test Maxnet.hinge(1:5, 3) ==    [ 
      #  1:5   3:5  1:3  1:5 
