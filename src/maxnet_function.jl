@@ -1,6 +1,6 @@
 """
     maxnet(
-        presences, predictors; 
+        p_a, X; 
         features, regularization_multiplier, regularization_function,
         addsamplestobackground, weight_factor, 
         kw...
@@ -9,8 +9,8 @@
     Fit a model using the maxnet algorithm.
 
 # Arguments
-- `presences`: A `BitVector` where presences are `true` and background samples are `false`
-- `predictors`: A Tables.jl-compatible table of predictors. Categorical predictors should be `CategoricalVector`s
+- `p_a`: A `BitVector` where presences are `true` and background samples are `false`
+- `X`: A Tables.jl-compatible table of predictors. Categorical predictors should be `CategoricalVector`s
 
 # Keywords
 - `features`: Either a `Vector` of `AbstractFeatureClass` to be used in the model, 

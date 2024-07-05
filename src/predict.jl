@@ -1,11 +1,11 @@
 """
-    predict(m, x; link, clamp)
+    predict(m, X; link, clamp)
 
     Use a maxnet model to predict on new data.
 
 # Arguments
 - `m`: a MaxnetModel as returned by `maxnet`
-- `x`: a `Tables.jl`-compatible table of predictors. All columns that were used to fit `m` should be present in `x`
+- `X`: a `Tables.jl`-compatible table of predictors. All columns that were used to fit `m` should be present in `X`
 
 # Keywords
 - `link`: the link function used. Defaults to CloglogLink(), which is the default on the Maxent Java appliation since version 4.3.
