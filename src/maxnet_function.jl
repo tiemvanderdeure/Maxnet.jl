@@ -61,7 +61,6 @@ function maxnet(
         kw...
     )
 end
-#maxnet(presences, predictors; kw...) = maxnet(presences, predictors, features; kw...)
 
 ### internal methods where features is not a keyword
 
@@ -129,10 +128,10 @@ function _maxnet(
     weights = presences .* 1. .+ (1 .- presences) .* weight_factor
 
     # generate lambdas
-    λ = lambdas(reg, presences, weights; λmax = 4, n = 200)
+    lambda = lambdas(reg, presences, weights; λmax = 4, n = 200)
 
     # Fit the model
-    lassopath = fit_lasso_path(mm, presences, wts = weights, penalty_factor = reg, λ = λ)
+    lassopath = fit_lasso_path(mm, presences; weights, penalty_factor = reg, lambda, kw...)
     
     # get the coefficients out
     coefs = SparseArrays.sparse(get_coefs(lassopath)[:, end])
