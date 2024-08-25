@@ -31,6 +31,7 @@ env1 = map(e -> [e[1]], env) # just the first row
     @test predictors == (a = [1,2,3,1], b = [1,2,3,1])
 end
 
+
 @testset "Maxnet" begin
     # some class combinations and keywords
     m = maxnet(p_a, env; features = "lq");
@@ -72,7 +73,14 @@ end
     @test complexity(empty_model) == 0
     @test Maxnet.selected_features(empty_model) == Symbol[]
     @test length(unique(predict(empty_model, env))) == 1
+
+    # test that keywords arguments are passed to glmnet
+    weights = ifelse.(p_a, 1.0, 10.0)
+    m_w = maxnet(p_a, env; features = "lq", addsamplestobackground = false, weights)
+    m = maxnet(p_a, env; features = "lq", addsamplestobackground = false)
+    @test m_w.entropy > m.entropy
 end
+m = maxnet(p_a, env; features = "lq", addsamplestobackground = false)
 
 @testset "MLJ" begin
     using MLJBase
