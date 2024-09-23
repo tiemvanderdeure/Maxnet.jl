@@ -12,7 +12,7 @@ _feature_columns(cont_vars, cat_vars, f::LinearFeature, nk) = [ModelMatrixColumn
 _feature_columns(cont_vars, cat_vars, f::QuadraticFeature, nk) = [ModelMatrixColumn(f, k) for k in keys(cont_vars)]
 function _feature_columns(cont_vars, cat_vars, f::CategoricalFeature, nk)
     mapreduce(hcat, keys(cat_vars)) do k
-        [ModelMatrixColumn(f, k, x) for x in CategoricalArrays.levels(cat_vars[k])]
+        [ModelMatrixColumn(f, k, (x,)) for x in CategoricalArrays.levels(cat_vars[k])]
     end
 end
 
