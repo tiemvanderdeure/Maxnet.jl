@@ -1,4 +1,4 @@
-using Maxnet, Test, Statistics, CategoricalArrays
+using Maxnet, Test, Statistics, CategoricalArrays, MLJTestInterface
 
 p_a, env = Maxnet.bradypus()
 # Make the levels in ecoreg string to make sure that that works
@@ -85,6 +85,16 @@ end
 m = maxnet(p_a, env; features = "lq", addsamplestobackground = false)
 
 @testset "MLJ" begin
+    data = MLJTestInterface.make_binary()
+    failures, summary = MLJTestInterface.test(
+        [MaxnetBinaryClassifier],
+        data...;
+        mod=@__MODULE__,
+        verbosity=0, # bump to debug
+        throw=false, # set to true to debug
+    )
+    @test isempty(failures)
+    
     using MLJBase
     mn = Maxnet.MaxnetBinaryClassifier
 
