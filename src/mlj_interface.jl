@@ -67,6 +67,13 @@ function MMI.fit(m::MaxnetBinaryClassifier, verbosity::Int, X, y)
     # convert categorical to boolean
     y_boolean = Bool.(MMI.int(y) .- 1)
 
+    allequal(y_boolean) && error(
+        """
+        Only class $(CategoricalArrays.get(first(y))) was found in the data. 
+        Provide data with two classes that represent background and presence samples.
+        """
+    )
+
     fitresult = maxnet(
         y_boolean, X; m.features,
         regularization_multiplier = m.regularization_multiplier,
