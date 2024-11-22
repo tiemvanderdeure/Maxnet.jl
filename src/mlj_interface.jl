@@ -24,30 +24,6 @@ function MaxnetBinaryClassifier(;
     )
 end
 
-"""
-    MaxnetBinaryClassifier
-
-    A model type for fitting a maxnet model using `MLJ`.
-        
-    Use `MaxnetBinaryClassifier()` to create an instance with default parameters, or use keyword arguments to specify parameters.
-    
-    The keywords `link`, and `clamp` are passed to [`Maxnet.predict`](@ref), while all other keywords are passed to [`maxnet`](@ref).
-    See the documentation of these functions for the meaning of these parameters and their defaults.
-
-    # Example
-    ```jldoctest
-    using Maxnet, MLJBase
-    p_a, env = Maxnet.bradypus()
-
-    mach = machine(MaxnetBinaryClassifier(features = "lqp"), env, categorical(p_a))
-    fit!(mach)
-    yhat = MLJBase.predict(mach, env)
-    # output
-    ```
-
-"""
-MaxnetBinaryClassifier
-
 MMI.metadata_pkg(
     MaxnetBinaryClassifier;
     name = "Maxnet",
@@ -67,9 +43,36 @@ MMI.metadata_model(
     reports_feature_importances=false
 )
 
+"""
+$(MMI.doc_header(MaxnetBinaryClassifier))
+
+The keywords `link`, and `clamp` are passed to [`Maxnet.predict`](@ref), while all other keywords are passed to [`maxnet`](@ref).
+See the documentation of these functions for the meaning of these parameters and their defaults.
+
+# Example
+```jldoctest
+using Maxnet, MLJBase
+p_a, env = Maxnet.bradypus()
+
+mach = machine(MaxnetBinaryClassifier(features = "lqp"), env, categorical(p_a))
+fit!(mach)
+yhat = MLJBase.predict(mach, env)
+# output
+```
+
+"""
+MaxnetBinaryClassifier
+
 function MMI.fit(m::MaxnetBinaryClassifier, verbosity::Int, X, y)
     # convert categorical to boolean
     y_boolean = Bool.(MMI.int(y) .- 1)
+
+    allequal(y_boolean) && error(
+        """
+        Only class $(CategoricalArrays.get(first(y))) was found in the data. 
+        Provide data with two classes that represent background and presence samples.
+        """
+    )
 
     fitresult = maxnet(
         y_boolean, X; m.features,
