@@ -1,5 +1,7 @@
-using Maxnet, Test, Statistics, CategoricalArrays, MLJTestInterface
+using Maxnet, Statistics, CategoricalArrays, MLJTestInterface
+using Test
 
+# read in Bradypus data
 p_a, env = Maxnet.bradypus()
 # Make the levels in ecoreg string to make sure that that works
 env = merge(env, (; ecoreg = recode(env.ecoreg, (l => string(l) for l in levels(env.ecoreg))...)))
@@ -82,7 +84,6 @@ end
     m = maxnet(p_a, env; features = "lq", addsamplestobackground = false)
     @test m_w.entropy > m.entropy
 end
-m = maxnet(p_a, env; features = "lq", addsamplestobackground = false)
 
 @testset "MLJ" begin
     data = MLJTestInterface.make_binary()
@@ -93,8 +94,10 @@ m = maxnet(p_a, env; features = "lq", addsamplestobackground = false)
         verbosity=0, # bump to debug
         throw=false, # set to true to debug
     )
-    @test isempty(failures)
-    
+    # The test that only has absences is expected to fail, all other tests should pass
+    @test length(failures) == 1    
+    @test first(failures).exception == ArgumentError("All data points are absences. Maxnet will only work with at least some presences and some absences.")
+
     using MLJBase
     mn = Maxnet.MaxnetBinaryClassifier
 
