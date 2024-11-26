@@ -1,3 +1,4 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+MLJBase = "a7f614a8-145f-11e9-1d2a-a57a1082229d"
 Maxnet = "81f79f80-22f2-4e41-ab86-00c11cf0f26f"
