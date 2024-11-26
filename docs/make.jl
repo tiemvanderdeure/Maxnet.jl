@@ -1,7 +1,7 @@
 using Maxnet
 using Documenter
 
-DocMeta.setdocmeta!(Maxnet, :DocTestSetup, :(using Maxnet); recursive=true)
+DocMeta.setdocmeta!(Maxnet, :DocTestSetup, :(using Maxnet; using MLJBase: Multiclass); recursive=true)
 
 makedocs(;
     modules=[Maxnet],
