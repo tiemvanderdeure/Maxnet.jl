@@ -49,9 +49,9 @@ function maxnet(
     n_knots::Int = 50,
     kw...)
     
-    if allunique(presences) 
+    if allequal(presences) 
         pa = first(presences) ? "presences" : "absences"
-        ArgumentError("All data points are $pa. Maxnet will only work with at least some presences and some absences.")
+        throw(ArgumentError("All data points are $pa. Maxnet will only work with at least some presences and some absences."))
     end
 
     _maxnet(
