@@ -46,18 +46,25 @@ MMI.metadata_model(
 """
 $(MMI.doc_header(MaxnetBinaryClassifier))
 
-The keywords `link`, and `clamp` are passed to [`Maxnet.predict`](@ref), while all other keywords are passed to [`maxnet`](@ref).
+The keywords `link`, and `clamp` are passed to [`predict`](@ref), while all other keywords are passed to [`maxnet`](@ref).
 See the documentation of these functions for the meaning of these parameters and their defaults.
 
 # Example
 ```jldoctest
-using Maxnet, MLJBase
+using MLJBase
 p_a, env = Maxnet.bradypus()
 
-mach = machine(MaxnetBinaryClassifier(features = "lqp"), env, categorical(p_a))
-fit!(mach)
+mach = machine(MaxnetBinaryClassifier(features = "lqp"), env, categorical(p_a), scitype_check_level = 0)
+fit!(mach, verbosity = 0)
 yhat = MLJBase.predict(mach, env)
+yhat[1:5]
 # output
+5-element UnivariateFiniteVector{Multiclass{2}, Bool, UInt32, Float64}:
+ UnivariateFinite{Multiclass{2}}(false=>0.812, true=>0.188)
+ UnivariateFinite{Multiclass{2}}(false=>0.811, true=>0.189)
+ UnivariateFinite{Multiclass{2}}(false=>0.501, true=>0.499)
+ UnivariateFinite{Multiclass{2}}(false=>0.811, true=>0.189)
+ UnivariateFinite{Multiclass{2}}(false=>0.752, true=>0.248)
 ```
 
 """
