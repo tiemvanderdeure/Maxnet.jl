@@ -94,9 +94,7 @@ end
         verbosity=0, # bump to debug
         throw=false, # set to true to debug
     )
-    # The test that only has absences is expected to fail, all other tests should pass
-    @test length(failures) == 1    
-    @test first(failures).exception == ArgumentError("All data points are absences. Maxnet will only work with at least some presences and some absences.")
+    @test isempty(failures)
 
     using MLJBase
     mn = Maxnet.MaxnetBinaryClassifier
