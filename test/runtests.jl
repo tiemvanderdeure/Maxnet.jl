@@ -1,5 +1,7 @@
-using Maxnet, Test, Statistics, CategoricalArrays
+using Maxnet, Statistics, CategoricalArrays, MLJTestInterface
+using Test
 
+# read in Bradypus data
 p_a, env = Maxnet.bradypus()
 # Make the levels in ecoreg string to make sure that that works
 env = merge(env, (; ecoreg = recode(env.ecoreg, (l => string(l) for l in levels(env.ecoreg))...)))
@@ -82,9 +84,18 @@ end
     m = maxnet(p_a, env; features = "lq", addsamplestobackground = false)
     @test m_w.entropy > m.entropy
 end
-m = maxnet(p_a, env; features = "lq", addsamplestobackground = false)
 
 @testset "MLJ" begin
+    data = MLJTestInterface.make_binary()
+    failures, summary = MLJTestInterface.test(
+        [MaxnetBinaryClassifier],
+        data...;
+        mod=@__MODULE__,
+        verbosity=0, # bump to debug
+        throw=false, # set to true to debug
+    )
+    @test isempty(failures)
+
     using MLJBase
     mn = Maxnet.MaxnetBinaryClassifier
 
