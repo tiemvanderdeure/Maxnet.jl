@@ -1,6 +1,6 @@
 module Maxnet
 
-import Tables, Lasso, GLMNet, Interpolations, CategoricalArrays, GLM, SparseArrays
+import Tables, GLMNet, Interpolations, CategoricalArrays, GLM, SparseArrays
 import StatsAPI, StatsBase, Statistics
 import MLJModelInterface as MMI
 
