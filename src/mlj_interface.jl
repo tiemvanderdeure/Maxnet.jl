@@ -55,7 +55,8 @@ In MLJ or MLJBase, bind an instance `model` to data with
 where
 
 - `X`: any table of input features (eg, a `DataFrame`) whose columns
-  each have one of the following element scitypes: `Continuous` or `<:Multiclass`.
+  each have one of the following element scitypes: `Continuous` or `<:Multiclass`. Check
+  `scitypes` with `schema(X)`.
 
 - `y`: is the target, which can be any `AbstractVector` whose element
   scitype is `<:Binary`. The first class should refer to background values,
