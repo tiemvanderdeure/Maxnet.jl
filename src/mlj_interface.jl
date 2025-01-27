@@ -71,7 +71,7 @@ where
 - `addsamplestobackground = true`: Controls wether to add presence values to the background.
 - `n_knots = 50`: The number of knots used for Threshold and Hinge features. A higher number gives more flexibility for these features.
 - `weight_factor = 100.0`: A `Float64` value to adjust the weight of the background samples.
-- `link = CloglogLink()`: The link function to use when predicting. See `Maxnet.predict` 
+- `link = Maxnet.CloglogLink()`: The link function to use when predicting. See `Maxnet.predict` 
 - `clamp = false`: Clamp values passed to `MLJBase.predict` to the range the model was trained on.
 
 # Operations
