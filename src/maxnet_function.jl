@@ -16,9 +16,11 @@
 - `features`: Either a `Vector` of `AbstractFeatureClass` to be used in the model, 
     or a `String` where "l" = linear and categorical, "q" = quadratic, "p" = product, "t" = threshold, "h" = hinge (e.g. "lqh"); or
     By default, the features are based on the number of presences are used. See [`default_features`](@ref)
-- `regularization_multiplier`: A constant to adjust regularization, where a higher `regularization_multiplier` results in a higher penalization for features
-- `regularization_function`: A function to compute a regularization for each feature. A default `regularization_function` is built in.
-- `addsamplestobackground`: A boolean, where `true` adds the background samples to the predictors. Defaults to `true`.
+- `regularization_multiplier`: A constant to adjust regularization, where a higher `regularization_multiplier` results in a higher 
+    penalization for features and therefore less overfitting.
+- `regularization_function`: A function to compute a regularization for each feature. A default `regularization_function` is built in
+    and should be used in most cases.
+- `addsamplestobackground`: Whether to add presence values to the background. Defaults to `true`.
 - `n_knots`: the number of knots used for Threshold and Hinge features. Defaults to 50. Ignored if there are neither Threshold nor Hinge features
 - `weight_factor`: A `Float64` value to adjust the weight of the background samples. Defaults to 100.0.
 - `kw...`: Further arguments to be passed to `GLMNet.glmnet`
@@ -32,6 +34,7 @@ using Maxnet
 p_a, env = Maxnet.bradypus();
 bradypus_model = maxnet(p_a, env; features = "lq")
 
+# Output
 Fit Maxnet model
 Features classes: Maxnet.AbstractFeatureClass[LinearFeature(), CategoricalFeature(), QuadraticFeature()]
 Entropy: 6.114650341746531
