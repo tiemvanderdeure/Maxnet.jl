@@ -44,6 +44,10 @@ end
     m4 = maxnet(p_a, env[(:ecoreg,)], addsamplestobackground =false)
     m5 = maxnet(p_a, env[(:cld6190_ann, :h_dem)]; features = "ht", n_knots = 3)
 
+    # test that the model throws an error if there are no presences
+    @test_throws "All data points are absences" maxnet(falses(length(p_a)), env)
+    @test_throws "All data points are presences" maxnet(trues(length(p_a)), env)
+
     # test the results
     @test m.entropy ≈ 6.114650341746531
     @test complexity(m) == 21
