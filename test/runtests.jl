@@ -35,6 +35,11 @@ env1 = map(e -> [e[1]], env) # just the first row
     @test predictors == (a = [1,2,3,1], b = [1,2,3,1])
 end
 
+m = maxnet(p_a, env; features = "lq");
+@time predict(m, env) 
+
+@profview for i in 1:5000 predict(m, env) end;
+
 
 @testset "Maxnet" begin
     # some class combinations and keywords
