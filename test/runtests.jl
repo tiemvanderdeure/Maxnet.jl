@@ -4,7 +4,7 @@ using Test
 # read in Bradypus data
 p_a, env = Maxnet.bradypus()
 # Make the levels in ecoreg string to make sure that that works
-env = merge(env, (; ecoreg = recode(env.ecoreg, (l => string(l) for l in levels(env.ecoreg))...)))
+env = merge(env, (; ecoreg = recode(env.ecoreg, (unwrap(l) => string(l) for l in levels(env.ecoreg))...)))
 env1 = map(e -> [e[1]], env) # just the first row
 
 @testset "utils" begin
