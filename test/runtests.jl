@@ -4,7 +4,7 @@ using Test
 # read in Bradypus data
 p_a, env = Maxnet.bradypus()
 # Make the levels in ecoreg string to make sure that that works
-env = merge(env, (; ecoreg = recode(env.ecoreg, (l => string(l) for l in levels(env.ecoreg))...)))
+env = merge(env, (; ecoreg = recode(env.ecoreg, (unwrap(l) => string(l) for l in levels(env.ecoreg))...)))
 env1 = map(e -> [e[1]], env) # just the first row
 
 @testset "utils" begin
@@ -135,7 +135,7 @@ end
 
     # test that this predicts the same as the equivalent model without mlj
 
-    @test all(predict(model, env_typed) .≈ mlj_true_probability)
+    @test all(Maxnet.predict(model, env_typed) .≈ mlj_true_probability)
 
     @test Statistics.mean(mlj_true_probability[p_a]) > Statistics.mean(mlj_true_probability[.~p_a])
     @test minimum(mlj_true_probability) > 0.
