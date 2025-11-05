@@ -2,10 +2,10 @@ struct MaxnetModel
     path::GLMNet.GLMNetPath
     features::Vector{<:AbstractFeatureClass}
     columns::Vector{ModelMatrixColumn}
-    coefs::AbstractVector
+    coefs::SparseArrays.SparseVector{Float64}
     alpha::Float64
     entropy::Float64
-    predictor_data
+    predictor_data::Tables.ColumnTable
     categorical_predictors::NTuple{<:Any, Symbol}
     continuous_predictors::NTuple{<:Any, Symbol}
 end

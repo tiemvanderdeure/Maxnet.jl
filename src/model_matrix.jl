@@ -1,8 +1,8 @@
 # A type with all metadata needed to (re)construct a column from data
-struct ModelMatrixColumn
-    feature::AbstractFeatureClass
+struct ModelMatrixColumn{F<:AbstractFeatureClass}
+    feature::F
     key::Symbol
-    args
+    args::Tuple
 end
 
 ModelMatrixColumn(feature, key, args...) = ModelMatrixColumn(feature, key, args)
@@ -41,21 +41,24 @@ function _feature_columns(cont_vars, cat_vars, f::ThresholdFeature, nk)
 end
 
 # Generate the actual column from the data and the column specification
-_get_column(data, ::LinearFeature, key) = data[key]
-_get_column(data, ::CategoricalFeature, key, x) = data[key] .== x
-_get_column(data, ::QuadraticFeature, key) = data[key].^2
-_get_column(data, ::ProductFeature, key, key2) = data[key] .* data[key2]
-_get_column(data, ::HingeFeature, key, mi, ma) = hingeval.(data[key], mi, ma)
-_get_column(data, ::ThresholdFeature, key, x) = data[key] .>= x
+_get_column!(A, data, ::LinearFeature, key) = A .= data[key]
+_get_column!(A, data, ::CategoricalFeature, key, x) = A .= data[key] .== (x)
+_get_column!(A, data, ::QuadraticFeature, key) = A .= data[key].^2
+_get_column!(A, data, ::ProductFeature, key, key2) = A .= data[key] .* data[key2]
+_get_column!(A, data, ::HingeFeature, key, mi, ma) = A .= hingeval.(data[key], mi, ma)
+_get_column!(A, data, ::ThresholdFeature, key, x) = A .= A .= data[key] .>= x
 
-_get_column(data, c::ModelMatrixColumn) = _get_column(data, c.feature, c.key, c.args...)
+function _get_column!(A, data, c::ModelMatrixColumn)
+    _get_column!(A, data, c.feature, c.key, c.args...)
+    return A
+end
 
 function _model_matrix(data, cols::Vector{<:ModelMatrixColumn})
     # pre-allocate memory
     A = zeros(Float64, length(first(data)), length(cols))
 
     for (i, c) in enumerate(cols)
-        A[:, i] .= _get_column(data, c)
+        _get_column!(view(A, :, i), data, c)
     end
     return A
 end
