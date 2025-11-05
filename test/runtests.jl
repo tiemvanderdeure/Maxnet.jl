@@ -135,7 +135,7 @@ end
 
     # test that this predicts the same as the equivalent model without mlj
 
-    @test all(predict(model, env_typed) .≈ mlj_true_probability)
+    @test all(Maxnet.predict(model, env_typed) .≈ mlj_true_probability)
 
     @test Statistics.mean(mlj_true_probability[p_a]) > Statistics.mean(mlj_true_probability[.~p_a])
     @test minimum(mlj_true_probability) > 0.
