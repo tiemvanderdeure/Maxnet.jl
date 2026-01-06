@@ -1,6 +1,6 @@
 name = "Maxnet"
 uuid = "81f79f80-22f2-4e41-ab86-00c11cf0f26f"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["Tiem van der Deure <tiemvanderdeure@gmail.com>", "Michael Krabbe Borregaard <mkborregaard@sund.ku.dk>"]
 
 [deps]
