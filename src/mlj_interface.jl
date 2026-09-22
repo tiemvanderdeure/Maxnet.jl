@@ -65,7 +65,7 @@ where
 # Hyper-parameters
 
 - `features`: Specifies which features classes to use in the model, e.g. "lqh" for linear, quadratic and hinge features. 
-    See also [Maxnet.maxnet](@ref)
+    See also [`Maxnet.maxnet`](@ref)
 - `regularization_multiplier = 1.0`: 'Adjust how tight the model will fit. Increasing this will reduce overfitting.
 - `regularization_function`: A function to compute the regularization of each feature class. Defaults to `Maxnet.default_regularization`
 - `addsamplestobackground = true`: Controls wether to add presence values to the background.
