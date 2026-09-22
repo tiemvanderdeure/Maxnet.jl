@@ -31,7 +31,7 @@ There are numerous settings that can be tweaked to change the model fit. These a
 ### Model settings
 The two most important settings to change when running Maxnet is the feature classes selected and the regularization factor.
 
-By default, the feature classes selected depends on the number of presence points, see [default_features](@ref). To set them manually, specify the `features` keyword using either a `Vector` of `AbstractFeatureClass`, or a `string`, where `l` represents `LinearFeature` and `CategoricalFeature`, `q` represents `QuadraticFeature`, `p` represents `ProductFeature`, `t` represents `ThresholdFeature` and `h` represents `HingeFeature`. 
+By default, the feature classes selected depends on the number of presence points, see [`default_features`](@ref). To set them manually, specify the `features` keyword using either a `Vector` of `AbstractFeatureClass`, or a `string`, where `l` represents `LinearFeature` and `CategoricalFeature`, `q` represents `QuadraticFeature`, `p` represents `ProductFeature`, `t` represents `ThresholdFeature` and `h` represents `HingeFeature`. 
 
 For example:
 ```julia
